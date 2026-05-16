@@ -1,0 +1,144 @@
+:root {
+  --primary: #00e5ff;
+  --secondary: #6c757d;
+  --success: #00e676;
+  --danger: #ff1744;
+  --warning: #ffea00;
+  --info: #00b0ff;
+  --light: #f8f9fa;
+  --dark: #0f172a;
+  --darker: #0b1120;
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  background-color: var(--darker);
+  color: var(--light);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism utility */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.3);
+}
+
+/* Typography */
+.text-gradient {
+  background: linear-gradient(90deg, var(--primary), #b000ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-primary {
+  color: var(--primary) !important;
+}
+
+/* Sidebar navigation */
+.nav-pills .nav-link {
+  color: #94a3b8;
+  transition: all 0.3s ease;
+}
+
+.nav-pills .nav-link:hover {
+  color: var(--light);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-pills .nav-link.active {
+  background: linear-gradient(45deg, var(--primary), #0088cc);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+}
+
+/* Dashboard metric numbers */
+.metric-value {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--darker);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Plotly overrides */
+.js-plotly-plot .plotly .modebar {
+  display: none !important;
+}
+
+.plot-container.plotly {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Premium Animations & Utilities */
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+}
+
+.glow-btn {
+  animation: pulse-glow 2s infinite;
+  transition: all 0.3s ease;
+}
+
+.glow-btn:hover {
+  animation: none;
+  box-shadow: 0 0 15px var(--primary);
+  transform: translateY(-2px);
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 0.75rem;
+}
+
+/* Danger pulse for slip detection */
+@keyframes danger-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(255, 23, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 23, 68, 0); }
+}
+
+.alert-slip {
+  animation: danger-pulse 1.5s infinite;
+  border-color: var(--danger) !important;
+  background: rgba(255, 23, 68, 0.1) !important;
+}
+
+.font-mono {
+  font-family: 'Roboto Mono', monospace;
+}
