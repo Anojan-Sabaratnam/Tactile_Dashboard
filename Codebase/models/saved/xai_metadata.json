@@ -1,0 +1,118 @@
+{
+  "n_samples": 10,
+  "sample_indices": [
+    783,
+    737,
+    683,
+    736,
+    781,
+    732,
+    680,
+    733,
+    790,
+    681
+  ],
+  "shap_rf_base_value": 0.5029976505766762,
+  "samples": [
+    {
+      "rank": 1,
+      "test_index": 783,
+      "true_label": 1,
+      "object": "bunny",
+      "orientation": "palm_45",
+      "rf_prob": 0.9812848295272029,
+      "cnn_prob": 0.9998568296432495,
+      "lstm_prob": 0.9982159733772278
+    },
+    {
+      "rank": 2,
+      "test_index": 737,
+      "true_label": 1,
+      "object": "mug",
+      "orientation": "palm_45",
+      "rf_prob": 0.9796646544209081,
+      "cnn_prob": 0.9997109770774841,
+      "lstm_prob": 0.9980252981185913
+    },
+    {
+      "rank": 3,
+      "test_index": 683,
+      "true_label": 1,
+      "object": "shampoo",
+      "orientation": "palm_45",
+      "rf_prob": 0.9796621923771269,
+      "cnn_prob": 0.9999390840530396,
+      "lstm_prob": 0.9985913634300232
+    },
+    {
+      "rank": 4,
+      "test_index": 736,
+      "true_label": 1,
+      "object": "mug",
+      "orientation": "palm_45",
+      "rf_prob": 0.9795888260157685,
+      "cnn_prob": 0.9979962706565857,
+      "lstm_prob": 0.9959188103675842
+    },
+    {
+      "rank": 5,
+      "test_index": 781,
+      "true_label": 1,
+      "object": "bunny",
+      "orientation": "palm_45",
+      "rf_prob": 0.9794567346668164,
+      "cnn_prob": 0.9999128580093384,
+      "lstm_prob": 0.9990531802177429
+    },
+    {
+      "rank": 6,
+      "test_index": 732,
+      "true_label": 1,
+      "object": "mug",
+      "orientation": "palm_45",
+      "rf_prob": 0.9794026397472413,
+      "cnn_prob": 0.9982185959815979,
+      "lstm_prob": 0.9950097799301147
+    },
+    {
+      "rank": 7,
+      "test_index": 680,
+      "true_label": 1,
+      "object": "shampoo",
+      "orientation": "palm_45",
+      "rf_prob": 0.9791685156370943,
+      "cnn_prob": 0.9994696974754333,
+      "lstm_prob": 0.9956320524215698
+    },
+    {
+      "rank": 8,
+      "test_index": 733,
+      "true_label": 1,
+      "object": "mug",
+      "orientation": "palm_45",
+      "rf_prob": 0.9788776443212603,
+      "cnn_prob": 0.9995620846748352,
+      "lstm_prob": 0.9973216652870178
+    },
+    {
+      "rank": 9,
+      "test_index": 790,
+      "true_label": 1,
+      "object": "bunny",
+      "orientation": "palm_45",
+      "rf_prob": 0.9788565886314625,
+      "cnn_prob": 0.9998385906219482,
+      "lstm_prob": 0.9981219172477722
+    },
+    {
+      "rank": 10,
+      "test_index": 681,
+      "true_label": 1,
+      "object": "shampoo",
+      "orientation": "palm_45",
+      "rf_prob": 0.9781656450596866,
+      "cnn_prob": 0.9997097849845886,
+      "lstm_prob": 0.9968562126159668
+    }
+  ]
+}
