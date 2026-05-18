@@ -7,13 +7,14 @@ import numpy as np
 
 dash.register_page(__name__, path="/historical-analytics", name="Historical Analytics")
 
-# Generate dummy historical data for 30 days
+# Generate dummy historical data for 30 days (seeded so charts are stable across restarts)
+_rng = np.random.default_rng(seed=42)
 dates = pd.date_range(end=pd.Timestamp.today(), periods=30)
-slips_prevented = np.random.normal(150, 20, 30).astype(int)
-slips_prevented[15] = 45  # simulate a day where line was down
-slips_prevented[28] = 210 # simulate a high throughput day
+slips_prevented = _rng.normal(150, 20, 30).astype(int)
+slips_prevented[15] = 45   # simulate a day where line was down
+slips_prevented[28] = 210  # simulate a high throughput day
 
-efficiency = np.clip(np.random.normal(98.5, 0.5, 30), 90, 100)
+efficiency = np.clip(_rng.normal(98.5, 0.5, 30), 90, 100)
 efficiency[15] = 92.1
 
 fig_slips = go.Figure(data=[

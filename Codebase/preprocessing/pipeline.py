@@ -13,13 +13,20 @@ All outputs are normalised (z-score on training statistics).
 """
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
-from typing import Dict, Tuple
+from pathlib import Path
+from typing import Tuple
 
 import numpy as np
+from sklearn.feature_selection import SelectKBest, mutual_info_classif
 from sklearn.preprocessing import StandardScaler
 
-from .loader import FINGER_PREFIXES, TAXELS_PER_FINGER, N_FEATURES
+try:
+    from .loader import FINGER_PREFIXES
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from preprocessing.loader import FINGER_PREFIXES
 
 
 # ── BioTac SP taxel layout ────────────────────────────────────────────
@@ -53,7 +60,8 @@ class PreparedData:
 
     # Metadata
     feature_names_tab: list    # 102 column names
-    scaler: StandardScaler     # fitted on training data
+    scaler: StandardScaler     # fitted on tabular features (102-dim)
+    raw_scaler: StandardScaler # fitted on raw 72-taxel input (for CNN/LSTM)
 
 
 # ── Handcrafted features for the Random Forest ────────────────────────
@@ -71,7 +79,6 @@ def _engineer_features(X_raw: np.ndarray) -> Tuple[np.ndarray, list]:
 
     Returns (N, 102) array and list of 102 feature names.
     """
-    n = X_raw.shape[0]
     extra = []
     names = []
 
@@ -83,7 +90,8 @@ def _engineer_features(X_raw: np.ndarray) -> Tuple[np.ndarray, list]:
         max_v = finger.max(axis=1)
         min_v = finger.min(axis=1)
         range_v = max_v - min_v
-        contact = (finger > np.median(finger)).sum(axis=1).astype(np.float32)
+        per_sample_median = np.median(finger, axis=1, keepdims=True)
+        contact = (finger > per_sample_median).sum(axis=1).astype(np.float32)
         total = finger.sum(axis=1)
 
         # Centre of pressure on the 4×6 grid
@@ -190,4 +198,46 @@ def prepare_all(
         y_test=y_test,
         feature_names_tab=feat_names,
         scaler=scaler,
+        raw_scaler=raw_scaler,
     )
+
+
+# ── Feature Selection ─────────────────────────────────────────────────
+
+def select_features(
+    X_train_tab: np.ndarray,
+    y_train: np.ndarray,
+    feature_names: list,
+    k: int = 50,
+) -> Tuple[np.ndarray, list, np.ndarray, SelectKBest]:
+    """Select the top-k features using Mutual Information.
+
+    Fits a SelectKBest selector on the training set only. Returns the MI
+    scores for all 102 features so callers can visualise the full ranking,
+    plus the names and indices of the k selected features.
+
+    Parameters
+    ----------
+    X_train_tab : (N, 102) normalised tabular feature array
+    y_train     : (N,) binary labels
+    feature_names : list of 102 feature name strings
+    k           : number of features to keep (default 50)
+
+    Returns
+    -------
+    scores           : (102,) MI score for every feature
+    selected_names   : list of k selected feature names, sorted by score desc
+    selected_indices : (k,) indices into the 102-dim feature space
+    selector         : fitted SelectKBest instance (for transform calls)
+    """
+    selector = SelectKBest(mutual_info_classif, k=k)
+    selector.fit(X_train_tab, y_train)
+
+    scores = selector.scores_
+    selected_mask = selector.get_support()
+    selected_indices = np.where(selected_mask)[0]
+    # Sort selected features by score descending for a clean ranking
+    selected_indices = selected_indices[np.argsort(scores[selected_indices])[::-1]]
+    selected_names = [feature_names[i] for i in selected_indices]
+
+    return scores, selected_names, selected_indices, selector

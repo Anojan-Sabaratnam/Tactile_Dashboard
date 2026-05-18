@@ -1,3 +1,5 @@
+import os
+
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html
@@ -84,4 +86,4 @@ content = html.Div(
 app.layout = html.Div([sidebar, content], className="bg-body-tertiary")
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8050)
+    app.run(debug=os.getenv("DASH_DEBUG", "false").lower() == "true", port=8050)

@@ -6,8 +6,12 @@ CNN, and BiLSTM, and saves the weights and metrics to disk for the dashboard.
 from __future__ import annotations
 
 import json
+import sys
 import time
 from pathlib import Path
+
+# Allow running as a direct script from any directory
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import joblib
 import numpy as np
@@ -26,7 +30,7 @@ from sklearn.metrics import (
 from torch.utils.data import DataLoader, TensorDataset
 
 from preprocessing.loader import get_feature_matrix, get_labels, load_raw
-from preprocessing.pipeline import prepare_all
+from preprocessing.pipeline import prepare_all, select_features
 from models.random_forest import train_random_forest
 from models.cnn_model import TactileCNN2D
 from models.lstm_model import TactileBiLSTM
@@ -61,7 +65,6 @@ def train_pytorch_model(
     X_train_t = torch.tensor(X_train, dtype=torch.float32)
     y_train_t = torch.tensor(y_train, dtype=torch.float32).unsqueeze(1)
     X_test_t = torch.tensor(X_test, dtype=torch.float32)
-    y_test_t = torch.tensor(y_test, dtype=torch.float32).unsqueeze(1)
 
     train_ds = TensorDataset(X_train_t, y_train_t)
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
@@ -128,6 +131,14 @@ def main():
 
     # Save scaler for inference
     joblib.dump(data.scaler, SAVED_DIR / "scaler.pkl")
+    joblib.dump(data.raw_scaler, SAVED_DIR / "raw_scaler.pkl")
+
+    # Feature selection — Mutual Information + SelectKBest(k=50)
+    print("Running feature selection (Mutual Information, k=50)...")
+    fs_scores, fs_selected_names, _, fs_selector = select_features(
+        data.X_train_tab, data.y_train, data.feature_names_tab, k=50,
+    )
+    joblib.dump(fs_selector, SAVED_DIR / "feature_selector.pkl")
 
     all_metrics = {}
 
@@ -189,6 +200,17 @@ def main():
             "y_prob": summary.pop("y_prob"),
         }
         summary_metrics[k] = summary
+
+    summary_metrics["feature_selection"] = {
+        "method": "Mutual Information + SelectKBest(k=50)",
+        "n_original": len(data.feature_names_tab),
+        "n_selected": 50,
+        "scores": {
+            name: float(score)
+            for name, score in zip(data.feature_names_tab, fs_scores)
+        },
+        "selected_features": fs_selected_names,
+    }
 
     with open(SAVED_DIR / "metrics.json", "w") as f:
         json.dump(summary_metrics, f, indent=2)

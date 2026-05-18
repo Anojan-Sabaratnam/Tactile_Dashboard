@@ -73,6 +73,15 @@ body {
   margin-bottom: 0.5rem;
 }
 
+/* ROI calculator result values — prevent long currency strings from wrapping */
+#roi-result,
+#roi-payback {
+  font-size: 1.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

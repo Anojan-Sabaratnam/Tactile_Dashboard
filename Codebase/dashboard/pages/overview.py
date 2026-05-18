@@ -1,6 +1,6 @@
 import dash
 import dash_bootstrap_components as dbc
-from dash import html, dcc
+from dash import html
 
 dash.register_page(__name__, path="/", name="Fleet Overview")
 
@@ -106,9 +106,8 @@ layout = html.Div(
                                 [
                                     html.H4("Sensor Blueprint", className="fw-bold mb-3 text-center"),
                                     html.Img(
-                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/BioTac_Sensor.jpg/800px-BioTac_Sensor.jpg",
-                                        className="img-fluid rounded-3 opacity-75 mb-3",
-                                        style={"filter": "brightness(0.8) contrast(1.2) grayscale(0.5)"}
+                                        src="/assets/cross_section.png",
+                                        className="img-fluid rounded-3 mb-3",
                                     ),
                                     html.P(
                                         "BioTac SP 3-Finger array: 74 distinct taxels monitored continuously.",
