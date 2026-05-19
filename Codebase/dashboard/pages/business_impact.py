@@ -138,9 +138,9 @@ layout = html.Div(
                                 text="Risk", hover_data=["Mitigation"],
                                 size=[1] * len(risk_data), size_max=15,
                             ).update_traces(
-                                textposition="top center", textfont=dict(color="white"),
+                                textposition="top center", textfont=dict(color="var(--bs-dark)"),
                             ).update_layout(
-                                template="plotly_dark",
+                                template="none",
                                 plot_bgcolor="rgba(0,0,0,0)",
                                 paper_bgcolor="rgba(0,0,0,0)",
                                 margin=dict(l=20, r=20, t=20, b=20),

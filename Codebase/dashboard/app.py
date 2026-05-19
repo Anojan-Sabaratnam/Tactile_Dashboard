@@ -8,7 +8,7 @@ app = dash.Dash(
     __name__,
     use_pages=True,
     external_stylesheets=[
-        dbc.themes.DARKLY, 
+        dbc.themes.FLATLY, 
         dbc.icons.BOOTSTRAP,
         "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap"
     ],
@@ -73,7 +73,7 @@ sidebar = html.Div(
             className="mt-4 gap-2",
         ),
     ],
-    className="sidebar bg-dark px-4 py-5 shadow-lg border-end border-secondary border-opacity-25 h-100",
+    className="sidebar bg-light px-4 py-5 shadow-sm border-end border-secondary border-opacity-10 h-100",
     style={"position": "fixed", "top": 0, "left": 0, "width": "280px", "zIndex": 1000},
 )
 
@@ -83,7 +83,7 @@ content = html.Div(
     style={"marginLeft": "280px", "minHeight": "100vh"},
 )
 
-app.layout = html.Div([sidebar, content], className="bg-body-tertiary")
+app.layout = html.Div([sidebar, content], className="bg-light")
 
 if __name__ == "__main__":
     app.run(debug=os.getenv("DASH_DEBUG", "false").lower() == "true", port=8050)

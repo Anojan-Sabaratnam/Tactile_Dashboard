@@ -1,20 +1,34 @@
 :root {
-  --primary: #00e5ff;
-  --secondary: #6c757d;
-  --success: #00e676;
-  --danger: #ff1744;
-  --warning: #ffea00;
-  --info: #00b0ff;
-  --light: #f8f9fa;
-  --dark: #0f172a;
-  --darker: #0b1120;
-  --glass-bg: rgba(30, 41, 59, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --primary: #2563eb;
+  --secondary: #475569;
+  --success: #059669;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --info: #0284c7;
+  --light: #f1f5f9;
+  --dark: #ffffff;
+  --darker: #f8fafc;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+
+  /* Override Bootstrap CSS Variables */
+  --bs-primary: #2563eb;
+  --bs-secondary: #475569;
+  --bs-success: #059669;
+  --bs-info: #0284c7;
+  --bs-warning: #d97706;
+  --bs-danger: #dc2626;
+  --bs-light: #f8fafc;
+  --bs-dark: #0f172a;
+  --bs-body-bg: #f8fafc;
+  --bs-body-color: #0f172a;
 }
 
 body {
   background-color: var(--darker);
-  color: var(--light);
+  color: var(--text-main);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
 }
@@ -38,7 +52,7 @@ body {
 
 /* Typography */
 .text-gradient {
-  background: linear-gradient(90deg, var(--primary), #b000ff);
+  background: linear-gradient(90deg, var(--primary), #818cf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -50,24 +64,25 @@ body {
 
 /* Sidebar navigation */
 .nav-pills .nav-link {
-  color: #94a3b8;
-  transition: all 0.3s ease;
+  color: #475569;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
 }
 
 .nav-pills .nav-link:hover {
-  color: var(--light);
-  background-color: rgba(255, 255, 255, 0.05);
+  color: #0f172a;
+  background-color: var(--glass-border);
 }
 
 .nav-pills .nav-link.active {
-  background: linear-gradient(45deg, var(--primary), #0088cc);
+  background: var(--primary);
   color: #fff;
-  box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
 }
 
 /* Dashboard metric numbers */
 .metric-value {
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 800;
   line-height: 1;
   margin-bottom: 0.5rem;
@@ -113,9 +128,9 @@ body {
 
 /* Premium Animations & Utilities */
 @keyframes pulse-glow {
-  0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
 }
 
 .glow-btn {
@@ -130,9 +145,10 @@ body {
 }
 
 .glass-panel {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: var(--dark);
+  border: 1px solid var(--glass-border);
   border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* Danger pulse for slip detection */

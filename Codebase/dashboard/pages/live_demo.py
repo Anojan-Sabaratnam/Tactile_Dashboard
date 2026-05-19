@@ -57,7 +57,7 @@ layout = html.Div(
 
                         html.Div(
                             id="slip-alert-box",
-                            className="p-3 text-center rounded-3 border border-secondary border-opacity-25 bg-darker mt-3 transition-all",
+                            className="p-3 text-center rounded-3 border border-secondary border-opacity-25 bg-white mt-3 transition-all",
                         ),
 
                         html.Hr(className="border-secondary opacity-25 my-4"),
@@ -155,7 +155,7 @@ def update_stream(_n, state):
     fig_ts.add_trace(go.Scatter(
         x=time_q, y=rf_q,
         mode="lines", name="RF Slip Prob",
-        line=dict(color="#00e5ff", width=3),
+        line=dict(color="#2563eb", width=3),
     ))
     fig_ts.add_trace(go.Scatter(
         x=time_q, y=cnn_q,
@@ -164,12 +164,12 @@ def update_stream(_n, state):
     ))
     fig_ts.add_hline(y=0.5, line_dash="dash", line_color="rgba(255, 23, 68, 0.5)", annotation_text="Slip Threshold")
     fig_ts.update_layout(
-        template="plotly_dark",
+        template="none",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=10, r=10, t=10, b=10),
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(range=[0, 1.1], gridcolor="rgba(255,255,255,0.1)", zeroline=False),
+        yaxis=dict(range=[0, 1.1], gridcolor="rgba(15,23,42,0.1)", zeroline=False),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
 
@@ -177,7 +177,7 @@ def update_stream(_n, state):
     heatmap_data = np.clip(np.random.normal(taxel_base, 0.1, (3, 24)), 0, 1)
     fig_hm = go.Figure(data=go.Heatmap(z=heatmap_data, colorscale="Viridis", showscale=False))
     fig_hm.update_layout(
-        template="plotly_dark",
+        template="none",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=0, r=0, t=0, b=0),
@@ -191,13 +191,13 @@ def update_stream(_n, state):
             html.H3("SLIP DETECTED", className="text-danger fw-bold mb-1 font-mono"),
             html.P("Triggering emergency grasp reflex...", className="text-danger small mb-0"),
         ]
-        alert_class = "p-3 text-center rounded-3 border border-danger bg-darker mt-3 transition-all alert-slip"
+        alert_class = "p-3 text-center rounded-3 border border-danger bg-white mt-3 transition-all alert-slip"
     else:
         alert_ui = [
             html.H4("STABLE GRASP", className="text-success fw-bold mb-1 font-mono"),
             html.P("Monitoring taxel array...", className="text-secondary small mb-0"),
         ]
-        alert_class = "p-3 text-center rounded-3 border border-success border-opacity-25 bg-darker mt-3 transition-all"
+        alert_class = "p-3 text-center rounded-3 border border-success border-opacity-25 bg-white mt-3 transition-all"
 
     new_state = {
         "is_slipping": state["is_slipping"],

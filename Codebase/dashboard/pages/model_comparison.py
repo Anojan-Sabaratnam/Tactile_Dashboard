@@ -119,7 +119,7 @@ def create_shap_waterfall(sample_idx: int = 0, n_top: int = 12) -> go.Figure:
     sv_top = sv[order]
     nm_top = [names[i] for i in order]
 
-    colors = ["#ff1744" if v > 0 else "#00b0ff" for v in sv_top]
+    colors = ["#dc2626" if v > 0 else "#0284c7" for v in sv_top]
     texts  = [f"+{v:.3f}" if v > 0 else f"{v:.3f}" for v in sv_top]
 
     fig = go.Figure(go.Bar(
@@ -129,7 +129,7 @@ def create_shap_waterfall(sample_idx: int = 0, n_top: int = 12) -> go.Figure:
         marker_color=colors,
         text=texts,
         textposition="outside",
-        textfont=dict(color="rgba(255,255,255,0.65)", size=9),
+        textfont=dict(color="rgba(15,23,42,0.65)", size=9),
         hovertemplate=(
             "<b>%{y}</b><br>"
             "SHAP contribution: %{x:.4f}<br>"
@@ -142,23 +142,23 @@ def create_shap_waterfall(sample_idx: int = 0, n_top: int = 12) -> go.Figure:
     fig.add_vline(
         x=0,
         line_dash="solid",
-        line_color="rgba(255,255,255,0.2)",
+        line_color="rgba(15,23,42,0.2)",
         line_width=1,
     )
 
     fig.update_layout(
-        template="plotly_dark",
+        template="none",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=10, r=65, t=10, b=35),
         xaxis=dict(
             title=dict(
                 text="← Pushes toward STABLE  |  Pushes toward SLIP →",
-                font=dict(size=10, color="rgba(255,255,255,0.45)"),
+                font=dict(size=10, color="rgba(15,23,42,0.45)"),
             ),
-            gridcolor="rgba(255,255,255,0.05)",
+            gridcolor="rgba(15,23,42,0.05)",
             zeroline=True,
-            zerolinecolor="rgba(255,255,255,0.25)",
+            zerolinecolor="rgba(15,23,42,0.25)",
             zerolinewidth=1,
         ),
         yaxis=dict(
@@ -221,9 +221,9 @@ def create_taxel_heatmaps(sample_idx: int = 0) -> go.Figure:
             z=grid,
             zmin=-vmax, zmax=vmax,
             colorscale=[
-                [0.0, "#00b0ff"],   # strong negative = stable
+                [0.0, "#0284c7"],   # strong negative = stable
                 [0.5, "#1e293b"],   # neutral
-                [1.0, "#ff1744"],   # strong positive = slip
+                [1.0, "#dc2626"],   # strong positive = slip
             ],
             text=cell_txt,
             hovertemplate="%{text}<extra></extra>",
@@ -252,7 +252,7 @@ def create_taxel_heatmaps(sample_idx: int = 0) -> go.Figure:
         )
 
     fig.update_layout(
-        template="plotly_dark",
+        template="none",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=10, r=60, t=35, b=10),
@@ -261,7 +261,7 @@ def create_taxel_heatmaps(sample_idx: int = 0) -> go.Figure:
     )
     # Style subplot titles
     for ann in fig.layout.annotations:
-        ann.update(font=dict(size=11, color="rgba(255,255,255,0.75)"))
+        ann.update(font=dict(size=11, color="rgba(15,23,42,0.75)"))
 
     return fig
 
@@ -290,10 +290,10 @@ def _placeholder_fig(msg: str) -> go.Figure:
     fig = go.Figure()
     fig.add_annotation(
         text=msg, x=0.5, y=0.5, xref="paper", yref="paper",
-        showarrow=False, font=dict(size=12, color="rgba(255,255,255,0.4)"),
+        showarrow=False, font=dict(size=12, color="rgba(15,23,42,0.4)"),
     )
     fig.update_layout(
-        template="plotly_dark",
+        template="none",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         height=300,
@@ -319,12 +319,12 @@ def create_bar_chart(data_dict: dict, metric_name: str, title: str, is_percentag
             y=values,
             text=[f"{v:.1%}" if is_percentage else f"{v:.1f}s" for v in values],
             textposition="auto",
-            marker_color=["#00e5ff", "#b000ff", "#00e676", "#ff1744"][: len(valid_names)],
+            marker_color=["#2563eb", "#6366f1", "#059669", "#dc2626"][: len(valid_names)],
         )
     ])
     fig.update_layout(
         title=title,
-        template="plotly_dark",
+        template="none",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=20, r=20, t=50, b=20),
@@ -349,7 +349,7 @@ def create_confusion_matrix(model_data: dict, name: str) -> go.Figure:
     ))
     fig.update_layout(
         title=f"{name} Error Dist",
-        template="plotly_dark",
+        template="none",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=20, r=20, t=40, b=20),
@@ -436,7 +436,7 @@ def create_deployment_recommendation_card(metrics_data: dict) -> dbc.Card:
             html.Td([
                 html.Span("★ ", className="text-warning me-1") if is_rec else html.Span(),
                 html.Strong(name) if is_rec else html.Span(name),
-            ], className="text-light small"),
+            ], className="text-dark small"),
             html.Td(f"{m.get('accuracy', 0):.1%}", className=f"text-center small {accent}"),
             html.Td(f"{m.get('f1', 0):.1%}",       className=f"text-center small {accent}"),
             html.Td(f"{m.get('auc', 0):.2f}",       className=f"text-center small {accent}"),
@@ -476,7 +476,7 @@ def create_deployment_recommendation_card(metrics_data: dict) -> dbc.Card:
                             html.Th("Explainability", className="text-center text-muted small fw-normal border-secondary"),
                         ])),
                         html.Tbody(table_rows),
-                    ], borderless=True, size="sm", className="mb-0 text-light"),
+                    ], borderless=True, size="sm", className="mb-0 text-dark"),
                     html.P(
                         "Latency figures measured on ARM Cortex-M7 (216 MHz, no FPU acceleration).",
                         className="text-muted mt-2 mb-0",
@@ -486,7 +486,7 @@ def create_deployment_recommendation_card(metrics_data: dict) -> dbc.Card:
             ], className="align-items-start"),
         ])
     ], className="glass-panel border-0 mb-4",
-       style={"borderLeft": "3px solid #00e676"})
+       style={"borderLeft": "3px solid #059669"})
 
 
 
@@ -508,7 +508,7 @@ def create_drift_chart(days, means, stds) -> go.Figure:
     fig.add_trace(go.Scatter(
         x=days, y=means,
         mode="lines+markers",
-        line=dict(color="#00e5ff", width=2),
+        line=dict(color="#2563eb", width=2),
         marker=dict(size=4),
     ))
 
@@ -518,7 +518,7 @@ def create_drift_chart(days, means, stds) -> go.Figure:
 
     for x, label in [(10, "Stable"), (23, "Drift Warning"), (28, "Retrain Required")]:
         fig.add_annotation(x=x, y=0.98, text=label, showarrow=False,
-                           font=dict(size=10, color="rgba(255,255,255,0.45)"),
+                           font=dict(size=10, color="rgba(15,23,42,0.45)"),
                            yref="paper", xref="x")
 
     fig.add_hline(y=0.72, line_dash="dash", line_color="rgba(255, 193, 7, 0.6)",
@@ -529,14 +529,14 @@ def create_drift_chart(days, means, stds) -> go.Figure:
                   annotation_font_color="rgba(255, 23, 68, 0.8)")
 
     fig.update_layout(
-        template="plotly_dark",
+        template="none",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=10, r=10, t=10, b=10),
-        xaxis=dict(title="Production Day", gridcolor="rgba(255,255,255,0.05)",
+        xaxis=dict(title="Production Day", gridcolor="rgba(15,23,42,0.05)",
                    range=[0.5, 30.5], tickvals=[1, 5, 10, 15, 20, 25, 30]),
         yaxis=dict(title="Prediction Confidence", range=[0.3, 1.02],
-                   gridcolor="rgba(255,255,255,0.08)"),
+                   gridcolor="rgba(15,23,42,0.08)"),
         showlegend=False,
         height=280,
     )
@@ -656,7 +656,7 @@ else:
                             ),
                         ])
                     ], className="glass-panel border-0 h-100",
-                       style={"borderTop": "3px solid #00e5ff"}),
+                       style={"borderTop": "3px solid #2563eb"}),
                 ], width=12, lg=6, className="mb-4"),
 
                 # Pillar 2 — IG Taxel Attribution Maps
@@ -772,18 +772,18 @@ else:
                             html.H4("Drift Response Protocol", className="fw-bold mb-4"),
                             dbc.ListGroup([
                                 dbc.ListGroupItem([html.Strong("Drift Trigger: "), "Confidence KL-divergence > 0.15"],
-                                                  className="bg-transparent border-secondary text-light small py-3"),
+                                                  className="bg-transparent border-secondary text-dark small py-3"),
                                 dbc.ListGroupItem([html.Strong("Response: "), "Automated flag raised to MLOps pipeline"],
-                                                  className="bg-transparent border-secondary text-light small py-3"),
+                                                  className="bg-transparent border-secondary text-dark small py-3"),
                                 dbc.ListGroupItem([html.Strong("Retrain Cadence: "), "Monthly full retrain + weekly incremental update"],
-                                                  className="bg-transparent border-secondary text-light small py-3"),
+                                                  className="bg-transparent border-secondary text-dark small py-3"),
                                 dbc.ListGroupItem([html.Strong("Data Strategy: "), "Flagged session samples added to training set"],
-                                                  className="bg-transparent border-secondary text-light small py-3"),
+                                                  className="bg-transparent border-secondary text-dark small py-3"),
                                 dbc.ListGroupItem([
                                     html.Strong("Downtime: "),
                                     html.Span("Zero", className="text-success fw-bold"),
                                     " — previous model stays live during retrain",
-                                ], className="bg-transparent border-secondary text-light small py-3"),
+                                ], className="bg-transparent border-secondary text-dark small py-3"),
                             ], flush=True),
                             html.Hr(className="border-secondary opacity-25 my-3"),
                             html.H6("Status Thresholds", className="fw-bold mb-2"),

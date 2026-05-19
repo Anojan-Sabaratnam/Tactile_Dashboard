@@ -20,13 +20,13 @@ efficiency[15] = 92.1
 fig_slips = go.Figure(data=[
     go.Bar(
         x=dates, y=slips_prevented,
-        marker_color='#00e5ff',
+        marker_color='#2563eb',
         name='Slips Prevented'
     )
 ])
 fig_slips.update_layout(
     title="Daily Slips Prevented (Last 30 Days)",
-    template="plotly_dark",
+    template="none",
     plot_bgcolor="rgba(0,0,0,0)",
     paper_bgcolor="rgba(0,0,0,0)",
     margin=dict(l=20, r=20, t=50, b=20),
@@ -37,13 +37,13 @@ fig_eff = go.Figure(data=[
     go.Scatter(
         x=dates, y=efficiency,
         mode='lines+markers',
-        line=dict(color='#00e676', width=3),
+        line=dict(color='#059669', width=3),
         name='Overall Yield Efficiency (%)'
     )
 ])
 fig_eff.update_layout(
     title="Production Yield Efficiency",
-    template="plotly_dark",
+    template="none",
     plot_bgcolor="rgba(0,0,0,0)",
     paper_bgcolor="rgba(0,0,0,0)",
     margin=dict(l=20, r=20, t=50, b=20),
@@ -90,7 +90,7 @@ layout = html.Div(
                             html.H4("Monthly Performance Summary", className="fw-bold mb-4"),
                             html.Div([
                                 html.H6("Total Components Handled", className="text-secondary mb-1"),
-                                html.H3("1,452,800", className="text-light fw-bold mb-4"),
+                                html.H3("1,452,800", className="text-dark fw-bold mb-4"),
                                 
                                 html.H6("Total Slips Prevented by AI", className="text-secondary mb-1"),
                                 html.H3("4,420", className="text-info fw-bold mb-4"),
@@ -99,7 +99,7 @@ layout = html.Div(
                                 html.H3("$663.00", className="text-success fw-bold mb-4"),
                                 
                                 html.H6("Average Sensor Uptime", className="text-secondary mb-1"),
-                                html.H3("99.8%", className="text-light fw-bold"),
+                                html.H3("99.8%", className="text-dark fw-bold"),
                             ])
                         ]),
                         className="glass-panel border-0 h-100",
