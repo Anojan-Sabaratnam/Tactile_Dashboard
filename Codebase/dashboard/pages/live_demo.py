@@ -19,10 +19,9 @@ def _initial_state() -> dict:
         "is_slipping": False,
         "slip_ticks_left": 0,
         "tick_count": 0,
-        "time_queue": list(range(MAX_POINTS)),
+        "time_queue": list(range(-MAX_POINTS + 1, 1)),
         "taxel_mean_queue": [0] * MAX_POINTS,
-        "prob_rf_queue": [0] * MAX_POINTS,
-        "prob_cnn_queue": [0] * MAX_POINTS,
+        "prob_ensemble_queue": [0] * MAX_POINTS,
     }
 
 
@@ -128,48 +127,42 @@ def update_stream(_n, state):
 
     if state["is_slipping"]:
         taxel_base = random.uniform(0.6, 1.0)
-        prob_rf = min(1.0, random.uniform(0.8, 1.0))
-        prob_cnn = min(1.0, random.uniform(0.75, 0.95))
+        prob_ensemble = min(1.0, random.uniform(0.78, 0.98))
         state["slip_ticks_left"] -= 1
         if state["slip_ticks_left"] <= 0:
             state["is_slipping"] = False
     else:
         taxel_base = random.uniform(0.0, 0.3)
-        prob_rf = random.uniform(0.0, 0.2)
-        prob_cnn = random.uniform(0.0, 0.25)
+        prob_ensemble = random.uniform(0.0, 0.18)
 
     # Rolling window — drop oldest entry, append newest (replaces mutable deque)
     time_q = state["time_queue"][-(MAX_POINTS - 1):] + [tick]
     taxel_q = state["taxel_mean_queue"][-(MAX_POINTS - 1):] + [taxel_base]
-    rf_q = state["prob_rf_queue"][-(MAX_POINTS - 1):] + [prob_rf]
-    cnn_q = state["prob_cnn_queue"][-(MAX_POINTS - 1):] + [prob_cnn]
+    ensemble_q = state["prob_ensemble_queue"][-(MAX_POINTS - 1):] + [prob_ensemble]
 
     # Time-series figure
     fig_ts = go.Figure()
     fig_ts.add_trace(go.Scatter(
-        x=time_q, y=taxel_q,
-        mode="lines", name="Avg Taxel Pressure",
-        line=dict(color="rgba(255, 255, 255, 0.3)", width=2),
-        fill="tozeroy", fillcolor="rgba(255, 255, 255, 0.05)",
-    ))
-    fig_ts.add_trace(go.Scatter(
-        x=time_q, y=rf_q,
-        mode="lines", name="RF Slip Prob",
-        line=dict(color="#2563eb", width=3),
-    ))
-    fig_ts.add_trace(go.Scatter(
-        x=time_q, y=cnn_q,
-        mode="lines", name="CNN Slip Prob",
-        line=dict(color="#b000ff", width=3, dash="dot"),
+        x=time_q, y=ensemble_q,
+        mode="lines", name="Specialist Ensemble — Slip Prob",
+        line=dict(color="#8b5cf6", width=3),
+        fill="tozeroy", fillcolor="rgba(139, 92, 246, 0.08)",
     ))
     fig_ts.add_hline(y=0.5, line_dash="dash", line_color="rgba(255, 23, 68, 0.5)", annotation_text="Slip Threshold")
     fig_ts.update_layout(
         template="none",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=10, r=10, t=10, b=10),
+        margin=dict(l=35, r=10, t=30, b=10),
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(range=[0, 1.1], gridcolor="rgba(15,23,42,0.1)", zeroline=False),
+        yaxis=dict(
+            range=[0, 1.05],
+            tickvals=[0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+            ticktext=["0.0", "0.2", "0.4", "0.6", "0.8", "1.0"],
+            gridcolor="rgba(15,23,42,0.1)",
+            zeroline=False,
+        ),
+        showlegend=True,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
 
@@ -205,8 +198,7 @@ def update_stream(_n, state):
         "tick_count": tick,
         "time_queue": time_q,
         "taxel_mean_queue": taxel_q,
-        "prob_rf_queue": rf_q,
-        "prob_cnn_queue": cnn_q,
+        "prob_ensemble_queue": ensemble_q,
     }
 
     return fig_ts, fig_hm, alert_ui, alert_class, new_state

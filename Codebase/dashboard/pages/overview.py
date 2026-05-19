@@ -110,7 +110,8 @@ layout = html.Div(
                                         className="img-fluid rounded-3 mb-3",
                                     ),
                                     html.P(
-                                        "BioTac SP 3-Finger array: 74 distinct taxels monitored continuously.",
+                                        "BioTac SP cross-section: 24 impedance electrodes (taxels) per finger, "
+                                        "plus fluid pressure and temperature — 74 channels total across 3 fingers.",
                                         className="text-center text-muted small"
                                     ),
                                 ]
