@@ -50,9 +50,15 @@ class PreparedData:
     X_train_img: np.ndarray    # (N_train, 3, 4, 6)  channels-first
     X_test_img: np.ndarray     # (N_test,  3, 4, 6)
 
-    # Finger sequences (LSTM)
+    # Finger sequences — global z-score (LSTM)
     X_train_seq: np.ndarray    # (N_train, 3, 24)
     X_test_seq: np.ndarray     # (N_test,  3, 24)
+
+    # Finger sequences — per-finger z-score (Specialist Ensemble)
+    # Each of the 3 fingers is normalised independently: more physically correct
+    # because finger baselines differ (thumb is larger, reads higher raw values).
+    X_train_seq_pf: np.ndarray  # (N_train, 3, 24)
+    X_test_seq_pf: np.ndarray   # (N_test,  3, 24)
 
     # Labels
     y_train: np.ndarray        # (N_train,)
@@ -62,6 +68,7 @@ class PreparedData:
     feature_names_tab: list    # 102 column names
     scaler: StandardScaler     # fitted on tabular features (102-dim)
     raw_scaler: StandardScaler # fitted on raw 72-taxel input (for CNN/LSTM)
+    per_finger_scalers: list   # 3 StandardScalers fitted per finger (for ensemble)
 
 
 # ── Handcrafted features for the Random Forest ────────────────────────
@@ -183,9 +190,25 @@ def prepare_all(
     X_img_train = _to_tactile_images(X_raw_train_n)
     X_img_test = _to_tactile_images(X_raw_test_n)
 
-    # 3) LSTM sequences
+    # 3) LSTM sequences — global z-score
     X_seq_train = _to_finger_sequences(X_raw_train_n)
     X_seq_test = _to_finger_sequences(X_raw_test_n)
+
+    # 4) Per-finger z-score sequences for the Specialist Ensemble.
+    #    Each finger's 24 taxels are normalised independently — mirrors MATLAB step_4.
+    pf_scalers = []
+    pf_fingers_train = []
+    pf_fingers_test  = []
+    for fidx in range(3):
+        scaler_f = StandardScaler()
+        col_train = X_train_raw[:, fidx * 24 : (fidx + 1) * 24]
+        col_test  = X_test_raw[:, fidx * 24 : (fidx + 1) * 24]
+        pf_fingers_train.append(scaler_f.fit_transform(col_train))
+        pf_fingers_test.append(scaler_f.transform(col_test))
+        pf_scalers.append(scaler_f)
+
+    X_seq_train_pf = np.stack(pf_fingers_train, axis=1).astype(np.float32)  # (N, 3, 24)
+    X_seq_test_pf  = np.stack(pf_fingers_test,  axis=1).astype(np.float32)
 
     return PreparedData(
         X_train_tab=X_tab_train.astype(np.float32),
@@ -194,11 +217,14 @@ def prepare_all(
         X_test_img=X_img_test,
         X_train_seq=X_seq_train,
         X_test_seq=X_seq_test,
+        X_train_seq_pf=X_seq_train_pf,
+        X_test_seq_pf=X_seq_test_pf,
         y_train=y_train,
         y_test=y_test,
         feature_names_tab=feat_names,
         scaler=scaler,
         raw_scaler=raw_scaler,
+        per_finger_scalers=pf_scalers,
     )
 
 

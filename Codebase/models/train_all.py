@@ -34,6 +34,7 @@ from preprocessing.pipeline import prepare_all, select_features
 from models.random_forest import train_random_forest
 from models.cnn_model import TactileCNN2D
 from models.lstm_model import TactileBiLSTM
+from models.specialist_ensemble import TactileSpecialistEnsemble
 
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -129,9 +130,10 @@ def main():
     print("Running preprocessing pipeline...")
     data = prepare_all(X_train_raw, X_test_raw, y_train, y_test)
 
-    # Save scaler for inference
+    # Save scalers for inference
     joblib.dump(data.scaler, SAVED_DIR / "scaler.pkl")
     joblib.dump(data.raw_scaler, SAVED_DIR / "raw_scaler.pkl")
+    joblib.dump(data.per_finger_scalers, SAVED_DIR / "per_finger_scalers.pkl")
 
     # Feature selection — Mutual Information + SelectKBest(k=50)
     print("Running feature selection (Mutual Information, k=50)...")
@@ -181,6 +183,21 @@ def main():
     )
     all_metrics["BiLSTM"] = lstm_metrics
 
+    # 4) Specialist Ensemble (MATLAB champion architecture)
+    #    Three independent 24→64→32→1 NNs, one per finger.
+    #    Uses per-finger z-score normalisation — more physically correct than global.
+    ensemble = TactileSpecialistEnsemble()
+    ensemble_metrics = train_pytorch_model(
+        ensemble,
+        data.X_train_seq_pf, data.y_train,
+        data.X_test_seq_pf, data.y_test,
+        name="Specialist Ensemble",
+        epochs=50,
+        batch_size=64,
+        lr=0.001,
+    )
+    all_metrics["Specialist Ensemble"] = ensemble_metrics
+
     # Save truth labels for the dashboard to compare against
     truth_data = {
         "y_test_true": data.y_test.tolist(),
@@ -220,7 +237,8 @@ def main():
 
     print("\nTraining complete! Artifacts saved to models/saved/")
     for model_name, m in summary_metrics.items():
-        print(f"{model_name:>15} -> Acc: {m['accuracy']:.4f} | F1: {m['f1']:.4f}")
+        if "accuracy" in m:
+            print(f"{model_name:>20} -> Acc: {m['accuracy']:.4f} | F1: {m['f1']:.4f}")
 
 
 if __name__ == "__main__":

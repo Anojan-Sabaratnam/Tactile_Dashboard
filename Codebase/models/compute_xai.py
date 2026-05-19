@@ -1,4 +1,4 @@
-"""XAI computation script — TreeSHAP (RF) + Integrated Gradients (CNN, BiLSTM).
+"""XAI computation script — TreeSHAP (RF) + Integrated Gradients (CNN, BiLSTM, Ensemble).
 
 Run once after training to generate explainability artefacts used by the dashboard:
 
@@ -6,12 +6,13 @@ Run once after training to generate explainability artefacts used by the dashboa
     python Codebase/models/compute_xai.py
 
 Outputs written to Codebase/models/saved/:
-    shap_rf_values.npy      (n_samples, 102)  SHAP value per feature per sample
-    shap_rf_base.npy        scalar             model expected value (base rate)
-    shap_rf_feature_names.json                 102 feature name strings
-    ig_cnn_values.npy       (n_samples, 3, 4, 6)  IG attributions per taxel
-    ig_lstm_values.npy      (n_samples, 3, 24)    IG attributions per taxel
-    xai_metadata.json       sample-level info (index, true label, predicted prob, object, orientation)
+    shap_rf_values.npy           (n_samples, 102)     SHAP value per feature per sample
+    shap_rf_base.npy             scalar                model expected value (base rate)
+    shap_rf_feature_names.json                         102 feature name strings
+    ig_cnn_values.npy            (n_samples, 3, 4, 6) IG attributions per taxel (CNN)
+    ig_lstm_values.npy           (n_samples, 3, 24)   IG attributions per taxel (BiLSTM)
+    ig_ensemble_values.npy       (n_samples, 3, 24)   IG attributions per finger (Ensemble)
+    xai_metadata.json            sample-level info (index, true label, predicted probs, object, orientation)
 """
 from __future__ import annotations
 
@@ -30,6 +31,7 @@ from preprocessing.loader import get_feature_matrix, get_labels, load_raw
 from preprocessing.pipeline import prepare_all
 from models.cnn_model import TactileCNN2D
 from models.lstm_model import TactileBiLSTM
+from models.specialist_ensemble import TactileSpecialistEnsemble
 
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -160,12 +162,27 @@ def main() -> None:
     np.save(SAVED_DIR / "ig_lstm_values.npy", ig_lstm.astype(np.float32))
     print(f"  BiLSTM IG shape: {ig_lstm.shape}")
 
-    # ── 4. Sample metadata ────────────────────────────────────────────────────
+    # ── 4. Integrated Gradients — Specialist Ensemble ────────────────────────
+    print("\nComputing Integrated Gradients (Specialist Ensemble)...")
+    ensemble = TactileSpecialistEnsemble().to(device)
+    ensemble.load_state_dict(
+        torch.load(SAVED_DIR / "specialist_ensemble.pth", map_location=device)
+    )
+    ensemble.eval()
+
+    # Use per-finger normalised sequences — same preprocessing the ensemble trained on
+    X_explain_seq_pf = data.X_test_seq_pf[top_idx]   # (N_EXPLAIN, 3, 24)
+    ig_ensemble = _compute_ig_batch(ensemble, X_explain_seq_pf, device)
+    np.save(SAVED_DIR / "ig_ensemble_values.npy", ig_ensemble.astype(np.float32))
+    print(f"  Ensemble IG shape: {ig_ensemble.shape}")
+
+    # ── 5. Sample metadata ────────────────────────────────────────────────────
     with open(SAVED_DIR / "test_truth.json") as f:
         truth = json.load(f)
 
-    cnn_probs = np.array(preds["2D CNN"]["y_prob"])
-    lstm_probs = np.array(preds["BiLSTM"]["y_prob"])
+    cnn_probs      = np.array(preds["2D CNN"]["y_prob"])
+    lstm_probs     = np.array(preds["BiLSTM"]["y_prob"])
+    ensemble_probs = np.array(preds.get("Specialist Ensemble", {}).get("y_prob", [0.0] * len(rf_probs)))
 
     metadata = {
         "n_samples": N_EXPLAIN,
@@ -173,14 +190,15 @@ def main() -> None:
         "shap_rf_base_value": base_value,
         "samples": [
             {
-                "rank":        i + 1,
-                "test_index":  int(top_idx[i]),
-                "true_label":  int(truth["y_test_true"][top_idx[i]]),
-                "object":      truth["test_objects"][top_idx[i]],
-                "orientation": truth["test_orientations"][top_idx[i]],
-                "rf_prob":     float(rf_probs[top_idx[i]]),
-                "cnn_prob":    float(cnn_probs[top_idx[i]]),
-                "lstm_prob":   float(lstm_probs[top_idx[i]]),
+                "rank":           i + 1,
+                "test_index":     int(top_idx[i]),
+                "true_label":     int(truth["y_test_true"][top_idx[i]]),
+                "object":         truth["test_objects"][top_idx[i]],
+                "orientation":    truth["test_orientations"][top_idx[i]],
+                "rf_prob":        float(rf_probs[top_idx[i]]),
+                "cnn_prob":       float(cnn_probs[top_idx[i]]),
+                "lstm_prob":      float(lstm_probs[top_idx[i]]),
+                "ensemble_prob":  float(ensemble_probs[top_idx[i]]),
             }
             for i in range(N_EXPLAIN)
         ],
@@ -189,10 +207,11 @@ def main() -> None:
         json.dump(metadata, f, indent=2)
 
     print("\nXAI artefacts saved to models/saved/")
-    print(f"  shap_rf_values.npy   {shap_values.shape}")
-    print(f"  ig_cnn_values.npy    {ig_cnn.shape}")
-    print(f"  ig_lstm_values.npy   {ig_lstm.shape}")
-    print(f"  xai_metadata.json    {N_EXPLAIN} samples")
+    print(f"  shap_rf_values.npy       {shap_values.shape}")
+    print(f"  ig_cnn_values.npy        {ig_cnn.shape}")
+    print(f"  ig_lstm_values.npy       {ig_lstm.shape}")
+    print(f"  ig_ensemble_values.npy   {ig_ensemble.shape}")
+    print(f"  xai_metadata.json        {N_EXPLAIN} samples")
 
 
 if __name__ == "__main__":

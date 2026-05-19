@@ -73,6 +73,12 @@ else:
     _drift_status, _drift_color = "Retrain Required", "danger"
 
 
+# ── Asymmetric cost constants (sourced from MATLAB step_5_traditional_vs_ai_simulation.m)
+# FN = missed slip → dropped component → £15 replacement cost
+# FP = false alarm → unnecessary stop → £25 (rework + line downtime premium)
+_FN_COST_GBP = 15
+_FP_COST_GBP = 25
+
 # ── Plain-English label map ───────────────────────────────────────────────────
 _FEATURE_LABELS: dict[str, str] = {}
 for _fp, _finger in [("ff", "Index"), ("mf", "Middle"), ("th", "Thumb")]:
@@ -357,18 +363,22 @@ def _make_error_summary(model_data: dict) -> html.Div:
     fn  = cm[1][0]
     fp  = cm[0][1]
     total_slips = cm[1][0] + cm[1][1]
-    fn_rate = fn / total_slips * 100 if total_slips > 0 else 0
+    fn_rate  = fn / total_slips * 100 if total_slips > 0 else 0
+    fn_cost  = fn * _FN_COST_GBP   # £15/missed slip — dropped component
+    fp_cost  = fp * _FP_COST_GBP   # £25/false alarm — crushed component / line stop
     return html.Div([
         dbc.Row([
             dbc.Col([
                 html.Div(str(fn), className="fw-bold text-danger fs-5 text-center"),
                 html.Div("missed slips", className="text-muted text-center", style={"fontSize": "11px"}),
                 html.Div(f"({fn_rate:.1f}% miss rate)", className="text-danger text-center", style={"fontSize": "10px"}),
+                html.Div(f"≈ £{fn_cost} cost", className="text-danger text-center", style={"fontSize": "10px"}),
             ], width=6),
             dbc.Col([
                 html.Div(str(fp), className="fw-bold text-warning fs-5 text-center"),
                 html.Div("false alarms", className="text-muted text-center", style={"fontSize": "11px"}),
                 html.Div("unnecessary stops", className="text-warning text-center", style={"fontSize": "10px"}),
+                html.Div(f"≈ £{fp_cost} cost", className="text-warning text-center", style={"fontSize": "10px"}),
             ], width=6),
         ], className="g-0 mt-1 mb-2"),
     ])
@@ -376,13 +386,13 @@ def _make_error_summary(model_data: dict) -> html.Div:
 
 def create_deployment_recommendation_card(metrics_data: dict) -> dbc.Card:
     models = {k: v for k, v in metrics_data.items()
-              if k in ["Random Forest", "2D CNN", "BiLSTM"]}
+              if k in ["Random Forest", "2D CNN", "BiLSTM", "Specialist Ensemble"]}
     if not models:
         return html.Div()
 
-    _EDGE_SCORES     = {"Random Forest": 1.0,       "2D CNN": 0.55,             "BiLSTM": 0.60}
-    _EXPLAINABILITY  = {"Random Forest": "Full",     "2D CNN": "Partial",        "BiLSTM": "Low"}
-    _LATENCY_LABEL   = {"Random Forest": "< 1 ms",   "2D CNN": "~8 ms",          "BiLSTM": "~6 ms"}
+    _EDGE_SCORES     = {"Random Forest": 1.0,       "2D CNN": 0.55,             "BiLSTM": 0.60,  "Specialist Ensemble": 0.85}
+    _EXPLAINABILITY  = {"Random Forest": "Full",     "2D CNN": "Partial",        "BiLSTM": "Low", "Specialist Ensemble": "Partial"}
+    _LATENCY_LABEL   = {"Random Forest": "< 1 ms",   "2D CNN": "~8 ms",          "BiLSTM": "~6 ms", "Specialist Ensemble": "~3 ms"}
 
     composite = {}
     for name, m in models.items():
@@ -409,6 +419,12 @@ def create_deployment_recommendation_card(metrics_data: dict) -> dbc.Card:
             "Captures temporal dynamics across the three-finger grasp sequence",
             "Moderate edge footprint with recurrent state overhead",
             "Explainability via Integrated Gradients per-finger attribution",
+        ],
+        "Specialist Ensemble": [
+            f"MATLAB champion architecture — Acc {rec.get('accuracy', 0):.1%} · F1 {rec.get('f1', 0):.1%} · AUC {rec.get('auc', 0):.2f}",
+            "Three independent 24→64→32→1 specialists — one per finger — averaged at inference",
+            "Per-finger z-score normalisation removes inter-finger baseline bias",
+            "Partial explainability via Integrated Gradients per-finger attribution",
         ],
     }
 
@@ -537,9 +553,9 @@ if not metrics_data:
         html.P("Run Codebase/models/train_all.py to generate model artifacts."),
     ])
 else:
-    cm_models    = [n for n in ["Random Forest", "2D CNN", "BiLSTM"]
+    cm_models    = [n for n in ["Random Forest", "2D CNN", "BiLSTM", "Specialist Ensemble"]
                     if n in metrics_data and "confusion_matrix" in metrics_data[n]]
-    cm_col_width = max(4, 12 // len(cm_models)) if cm_models else 12
+    cm_col_width = max(3, 12 // len(cm_models)) if cm_models else 12
 
     # ── XAI sample info for subheadings ──────────────────────────────────────
     _top_sample    = (_xai_meta.get("samples") or [{}])[0]
