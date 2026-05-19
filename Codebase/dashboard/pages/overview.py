@@ -51,7 +51,7 @@ layout = html.Div(
                 ),
                 dbc.Col(
                     create_kpi_card(
-                        "Slips Prevented", "4,291", "Last 24 Hours", "bi-shield-check", "success"
+                        "Slips Prevented", "148", "Last 24 Hours", "bi-shield-check", "success"
                     ),
                     width=12, md=6, xl=3, className="mb-4",
                 ),
